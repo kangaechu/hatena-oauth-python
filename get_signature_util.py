@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 from urllib import quote
 
@@ -14,13 +14,15 @@ def normalize_key(consumer_secret, oauth_token_secret=None):
     oauth1.0のsignature生成のためのKey文字列
     """
     if oauth_token_secret == None:
-        key = quote(consumer_secret, '') +"&"
+        key = quote(consumer_secret, '') + "&"
     else:
-        key = "%s&%s" % (quote(consumer_secret, ''), quote(oauth_token_secret, ''))
+        key = "%s&%s" % (quote(consumer_secret, ''),
+                         quote(oauth_token_secret, ''))
 
     #key = '&'.join([quote(key,'') for key in [consumer_secret, (oauth_token_secret or '')]])
-    #print "Signature Key: "+ key
+    # print "Signature Key: "+ key
     return key
+
 
 def normalize_data(http_method, request_url, header_params):
     """
@@ -36,20 +38,21 @@ def normalize_data(http_method, request_url, header_params):
         生成した文字列
     """
     query_str = '&'.join([
-            '='.join(
-                [key, quote(header_params.get(key, ''),'')]
-            ) for key in sorted(header_params.keys())
+        '='.join(
+                [key, quote(header_params.get(key, ''), '')]
+        ) for key in sorted(header_params.keys())
     ])
 
     target_str = '&'.join(
-        [quote(val,'')
+        [quote(val, '')
          for val in [http_method.upper(), request_url.lower(), query_str]
          if val is not None])
 
-    #print "Signature Data: "+ target_str
+    # print "Signature Data: "+ target_str
     return target_str
 
-def make_signature(consumer_secret, http_method, request_url, header_params, oauth_token_secret=None ):
+
+def make_signature(consumer_secret, http_method, request_url, header_params, oauth_token_secret=None):
     """
     OAuth1.0のsignatureを生成する。
     Args:
@@ -69,14 +72,15 @@ def make_signature(consumer_secret, http_method, request_url, header_params, oau
     normalized_data = normalize_data(http_method, request_url, header_params)
 
     signature = hmac.new(
-                normalized_key.encode('utf-8'),
-                normalized_data.encode('utf-8'),
-                hashlib.sha1
-            )
+        normalized_key.encode('utf-8'),
+        normalized_data.encode('utf-8'),
+        hashlib.sha1
+    )
     return base64.b64encode(signature.digest()).decode('utf-8')
+
 
 if __name__ == "__main__":
     print normalize_key("hogefuga")
     print normalize_data("POST", "https://hoge.com", {"oauth_callback": "oob"})
 
-    print make_signature("hogefuga", "POST", "https://hoge.com", {"oauth_callback": "oob"} )
+    print make_signature("hogefuga", "POST", "https://hoge.com", {"oauth_callback": "oob"})
